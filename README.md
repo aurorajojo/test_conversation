@@ -1,32 +1,63 @@
 ```mermaid
-graph TD
-  使用者裝置[使用者 裝置 手機 電腦] --> LineBot[Line Bot]
-  LineBot --> Webhook[Webhook 接收訊息]
-  Webhook --> FlaskApp[Flask 應用]
-  FlaskApp --> RenderCom[Render com 部署]
-  FlaskApp --> Auth[認證 與 授權 模組]
-  FlaskApp --> Groq[Groq 運算平台 LLaMA 70B versatile 對話生成]
-  FlaskApp --> Summarizer[gpt-oss-120b 摘要生成]
-  FlaskApp --> MongoDB[MongoDB 對話 與 用戶 資料庫]
-  MongoDB --> Audit[資料 完整性 與 可追蹤性]
-  FlaskApp --> HFSpace[Hugging Face Space 向量模型 部署 multilingual-e5-large]
-  HFSpace --> VectorDB[向量化 摘要 存放於 MongoDB 向量欄位]
-  每日摘要[每日 歷史 對話 摘要] --> HFSpace
-  使用者輸入[使用者 當次 輸入] --> Vectorize[向量化 比對 最相近 歷史摘要]
-  Vectorize --> VectorDB
-  FlaskApp --> RAG[檢索輔助 RAG 流程 結合 歷史摘要 與 校園資源]
-  RAG --> Groq
-  RAG --> Summarizer
-  FlaskApp --> EmotionAnalysis[情緒分析 模組]
-  EmotionAnalysis --> Dashboard[情緒 儀錶板 顯示 過去七天 情緒 比例]
-  FlaskApp --> CampusResources[中原大學 即時 資源 資訊]
-  FlaskApp --> Activities[可滾動 藝文活動 列表 報名 功能]
-  FlaskApp --> Scales[董氏憂鬱量表 大專生版 及 網路遊戲成癮量表]
-  Dashboard --> 使用者裝置
-  Activities --> 使用者裝置
-  CampusResources --> 使用者裝置
-  AdminPanel[管理 後台] --> Audit
-  FlaskApp --> AdminPanel
+graph LR
+  subgraph 系統主體[中原心理支持與分析聊天機器人系統]
+    
+    subgraph AI模組群[AI 模組群]
+      LLM[大型語言模型 LLaMA 70B 對話生成]
+      SUM[摘要生成模型 gpt-oss-120b]
+      RAG[檢索增強生成 RAG]
+      VECTOR[Hugging Face 向量模型 multilingual-e5-large]
+      EMOTION[情緒分析 模組]
+      MEMORY[歷史摘要 與 使用者心理狀態 記憶庫]
+    end
+
+    subgraph 系統後端[Flask 系統服務]
+      API[Flask API 伺服器]
+      DB[MongoDB 對話 與 向量 資料庫]
+      DASHBOARD[情緒儀錶板 與 量表分析]
+      RESOURCE[中原大學 資源查詢 模組]
+      ACTIVITY[藝文活動 推薦 模組]
+    end
+
+    subgraph 平台與部署[平台 與 部署環境]
+      RENDER[Render com 部署]
+      GROQ[Groq 高速運算平台]
+    end
+  end
+
+  subgraph Line區[LINE 聊天互動層]
+    LINEBOT[LINE Bot]
+    WEBHOOK[Webhook]
+    USER[中原大學 學生 使用者]
+  end
+
+  %% 流程連線
+  USER --> LINEBOT
+  LINEBOT --> WEBHOOK
+  WEBHOOK --> API
+
+  API --> LLM
+  API --> SUM
+  API --> RAG
+  API --> VECTOR
+  API --> EMOTION
+  API --> DB
+  API --> RESOURCE
+  API --> ACTIVITY
+  API --> DASHBOARD
+  API --> MEMORY
+
+  LLM --> GROQ
+  SUM --> GROQ
+  API --> RENDER
+  DB --> MEMORY
+  VECTOR --> DB
+  EMOTION --> DASHBOARD
+
+  %% 輸出
+  API --> LINEBOT
+  LINEBOT --> USER
+
 
 ```
 # 我想聊聊情緒困擾調適
@@ -64,6 +95,7 @@ graph TD
 ```bash
 有時候覺得自己快要被壓垮了，可是每天還是得裝作沒事，繼續把日子過下去。
 ```
+
 
 
 
